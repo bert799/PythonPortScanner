@@ -1,4 +1,5 @@
 import socket
+import scapy.all as scapy
 import ipaddress
 from classes import bcolors
 
@@ -35,11 +36,19 @@ def detect_ip_type(ip):
 def scan_network():
     ip = select_network_ip()
     ip_type = detect_ip_type(ip)
+    request = scapy.ARP()
     if ip_type == 'network':
         print('Scanning network')
-        for i in ipaddress.IPv4Network(ip):
-            if s.connect_ex((str(i), 80)) == 0:
-                print(f'{bcolors.OKGREEN}Host up: {str(i)}{bcolors.ENDC}')
+        request = scapy.ARP()
+        request.pdst = ip
+        broadcast = scapy.Ether()
+        broadcast.dst = 'ff:ff:ff:ff:ff:ff'
+        request_broadcast = broadcast / request
+        answered_list = scapy.srp(request_broadcast, timeout=1, verbose=False)[0]
+        print(f'{bcolors.OKGREEN}Hosts up:{bcolors.ENDC}')
+        for element in answered_list:
+            print(element[1].psrc)
+        print(f'{bcolors.FAIL}Hosts down:{bcolors.ENDC}')
     elif ip_type == 'host':
         print('Scanning host')
         if s.connect_ex((ip, 80)) == 0:
