@@ -3,7 +3,49 @@ import scapy.all as scapy
 import ipaddress
 from classes import bcolors
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+well_known_ports = {
+    20: 'FTP (File Transfer Protocol)',
+    21: 'FTP (File Transfer Protocol)',
+    22: 'SSH (Secure Shell)',
+    23: 'Telnet',
+    25: 'SMTP (Simple Mail Transfer Protocol)',
+    53: 'DNS (Domain Name System)',
+    80: 'HTTP (Hypertext Transfer Protocol)',
+    110: 'POP3 (Post Office Protocol version 3)',
+    119: 'NNTP (Network News Transfer Protocol)',
+    123: 'NTP (Network Time Protocol)',
+    143: 'IMAP (Internet Message Access Protocol)',
+    161: 'SNMP (Simple Network Management Protocol)',
+    194: 'IRC (Internet Relay Chat)',
+    443: 'HTTPS (HTTP Secure)',
+    445: 'SMB (Server Message Block)',
+    465: 'SMTPS (Simple Mail Transfer Protocol Secure)',
+    514: 'Syslog',
+    587: 'SMTP (Mail Submission)',
+    631: 'IPP (Internet Printing Protocol)',
+    873: 'rsync',
+    993: 'IMAPS (Internet Message Access Protocol Secure)',
+    995: 'POP3S (Post Office Protocol version 3 Secure)',
+    1080: 'SOCKS (SOCKetS)',
+    1194: 'OpenVPN',
+    1433: 'Microsoft SQL Server',
+    1434: 'Microsoft SQL Server',
+    1521: 'Oracle',
+    1723: 'PPTP (Point-to-Point Tunneling Protocol)',
+    3306: 'MySQL',
+    3389: 'RDP (Remote Desktop Protocol)',
+    5432: 'PostgreSQL',
+    5900: 'VNC (Virtual Network Computing)',
+    5901: 'VNC (Virtual Network Computing)',
+    5902: 'VNC (Virtual Network Computing)',
+    5903: 'VNC (Virtual Network Computing)',
+    6379: 'Redis',
+    8080: 'HTTP Alternate (http_alt)',
+    8443: 'HTTPS Alternate (https_alt)',
+    9000: 'Jenkins',
+    9090: 'HTTP Alternate (http_alt)',
+    9091: 'HTTP Alternate (http_alt)'
+}
 
 def main_menu():
 
@@ -69,12 +111,44 @@ def scan_ip_menu():
             print(f'{bcolors.FAIL}Host {ip} is down{bcolors.ENDC}')
     else:
         print(f'{bcolors.FAIL}Invalid IP or network{bcolors.ENDC}')
+
+def port_scan(s, ip, port):
+    try:
+        s.connect((ip, port))
+        return True
+    except:
+        return False
         
 def scan_ports_menu():
-    print('Scanning ports')
-    for i in range(1, 1024):
-        if s.connect_ex((' ', i)) == 0:
-            print('Port open: ' + str(i))
+    ip = input('Enter the IP of a host to scan: ')
+    port_range = input('(Optinal) Enter the port range to scan (ex: 1-100): ')
+    if port_range == '':
+        port_range = [1, 65535]
+    elif '-' in port_range:
+        port_range = port_range.split('-')
+        port_range = range(int(port_range[0]), int(port_range[1]))
+    else:
+        port_range = [int(port_range)]
+    scan_ports(ip, port_range)
+
+def scan_ports(ip, port_range):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        #s.settimeout(0.5)
+        print(f'{bcolors.OKBLUE}Scanning ports for {ip}{bcolors.ENDC}')
+        print('Port number --- Service name --- Well-known service name')
+        open_ports = 0
+        closed_ports = 0
+        for port in port_range:
+            if port_scan(s, ip, port):
+                print(f"{bcolors.OKGREEN}{port}{bcolors.ENDC} {socket.getservbyport(port, 'tcp')} {well_known_ports.get(port, 'Unknown')}")
+                open_ports += 1
+            else:
+                closed_ports += 1
+        print(f'{bcolors.OKBLUE}Open ports: {open_ports}{bcolors.ENDC} {bcolors.FAIL}Closed ports: {closed_ports}{bcolors.ENDC}')
+        return True
+    except:
+        return False
 
 def main():
     while True:
