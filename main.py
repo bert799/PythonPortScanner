@@ -1,6 +1,6 @@
 import socket
 import scapy.all as scapy
-import ipaddress
+from mac_vendor_lookup import MacLookup
 from classes import bcolors
 
 well_known_ports = {
@@ -100,7 +100,7 @@ def scan_ip_menu():
         answered_list = scan_ip(ip)
         print(f'{bcolors.OKGREEN}Hosts up:')
         for element in answered_list:
-            print(element[1].psrc, ' - ', get_hostname(element[1].psrc)[0], ' - ', element[1].hwsrc)
+            print(element[1].psrc,' - ', element[1].hwsrc)
         print(f'{bcolors.ENDC}')
     elif ip_type == 'host':
         print('Scanning host')
@@ -134,14 +134,14 @@ def scan_ports_menu():
 def scan_ports(ip, port_range):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        #s.settimeout(0.5)
+        s.settimeout(1)
         print(f'{bcolors.OKBLUE}Scanning ports for {ip}{bcolors.ENDC}')
         print('Port number --- Service name --- Well-known service name')
         open_ports = 0
         closed_ports = 0
         for port in port_range:
             if port_scan(s, ip, port):
-                print(f"{bcolors.OKGREEN}{port}{bcolors.ENDC} {socket.getservbyport(port, 'tcp')} {well_known_ports.get(port, 'Unknown')}")
+                print(f"{bcolors.OKGREEN}{port}{bcolors.ENDC}                   {socket.getservbyport(port, 'tcp')}        {well_known_ports.get(port, 'Unknown')}")
                 open_ports += 1
             else:
                 closed_ports += 1
