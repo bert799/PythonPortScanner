@@ -136,7 +136,7 @@ def scan_ports(ip, port_range):
             port_str = str(port)
             service_name = str(socket.getservbyport(port, 'tcp'))
             well_known_ports_str = str(well_known_ports.get(port, 'Unknown'))
-            message = bcolors.OKGREEN + port_str + bcolors.ENDC + ' '* (15 - len(port_str)) + service_name + ' '* (14 - len(service_name)) + well_known_ports_str
+            message = bcolors.OKGREEN + port_str + bcolors.ENDC + ' '* (20 - len(port_str)) + service_name + ' '* (20 - len(service_name)) + well_known_ports_str
             print(message)
             open_ports += 1
             s.close()
