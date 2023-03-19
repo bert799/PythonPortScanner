@@ -135,6 +135,7 @@ def scan_ports(ip, port_range):
             s.connect((ip, port))
             print(f"{bcolors.OKGREEN}{port}{bcolors.ENDC}                   {socket.getservbyport(port, 'tcp')}        {well_known_ports.get(port, 'Unknown')}")
             open_ports += 1
+            s.close()
         except:
             closed_ports += 1
             pass
