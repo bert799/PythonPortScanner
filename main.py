@@ -1,6 +1,5 @@
 import socket
 import scapy.all as scapy
-from mac_vendor_lookup import MacLookup
 from classes import bcolors
 
 well_known_ports = {
@@ -111,13 +110,6 @@ def scan_ip_menu():
             print(f'{bcolors.FAIL}Host {ip} is down{bcolors.ENDC}')
     else:
         print(f'{bcolors.FAIL}Invalid IP or network{bcolors.ENDC}')
-
-def port_scan(s, ip, port):
-    try:
-        s.connect((ip, port))
-        return True
-    except:
-        return False
         
 def scan_ports_menu():
     ip = input('Enter the IP of a host to scan: ')
@@ -132,23 +124,21 @@ def scan_ports_menu():
     scan_ports(ip, port_range)
 
 def scan_ports(ip, port_range):
-    try:
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.settimeout(1)
-        print(f'{bcolors.OKBLUE}Scanning ports for {ip}{bcolors.ENDC}')
-        print('Port number --- Service name --- Well-known service name')
-        open_ports = 0
-        closed_ports = 0
-        for port in port_range:
-            if port_scan(s, ip, port):
-                print(f"{bcolors.OKGREEN}{port}{bcolors.ENDC}                   {socket.getservbyport(port, 'tcp')}        {well_known_ports.get(port, 'Unknown')}")
-                open_ports += 1
-            else:
-                closed_ports += 1
-        print(f'{bcolors.OKBLUE}Open ports: {open_ports}{bcolors.ENDC} {bcolors.FAIL}Closed ports: {closed_ports}{bcolors.ENDC}')
-        return True
-    except:
-        return False
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.settimeout(1)
+    print(f'{bcolors.OKBLUE}Scanning ports for {ip}{bcolors.ENDC}')
+    print('Port number --- Service name --- Well-known service name')
+    open_ports = 0
+    closed_ports = 0
+    for port in port_range:
+        try:
+            s.connect((ip, port))
+            print(f"{bcolors.OKGREEN}{port}{bcolors.ENDC}                   {socket.getservbyport(port, 'tcp')}        {well_known_ports.get(port, 'Unknown')}")
+            open_ports += 1
+        except:
+            closed_ports += 1
+            pass
+    print(f'{bcolors.OKBLUE}Open ports: {open_ports}{bcolors.ENDC} {bcolors.FAIL}Closed ports: {closed_ports}{bcolors.ENDC}')
 
 def main():
     while True:
