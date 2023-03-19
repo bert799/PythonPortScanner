@@ -133,7 +133,11 @@ def scan_ports(ip, port_range):
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             s.settimeout(1)
             s.connect((ip, port))
-            print(f"{bcolors.OKGREEN}{port}{bcolors.ENDC}                   {socket.getservbyport(port, 'tcp')}        {well_known_ports.get(port, 'Unknown')}")
+            port_str = f"{bcolors.OKGREEN}{port}{bcolors.ENDC}"
+            service_name = str(socket.getservbyport(port, 'tcp'))
+            well_known_ports_str = str(well_known_ports.get(port, 'Unknown'))
+            message = port_str + ' '* (15 - len(port_str)) + service_name + ' '* (14 - len(service_name)) + well_known_ports_str
+            print(message)
             open_ports += 1
             s.close()
         except:
